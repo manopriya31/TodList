@@ -10,12 +10,24 @@ import UIKit
 
 class ViewController: UITableViewController {
     
-    var itemArray = ["Find Mike", "Buy Milk", "Buy Rice"]
+    var itemArray = [Item]()
     let defaults = UserDefaults.standard
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        if let items = defaults.array(forKey: "TodoListArray") as?  [String] {
+        let newItem1 = Item()
+        newItem1.title = "Buy Chocolate"
+        itemArray.append(newItem1)
+        
+        let newItem2 = Item()
+        newItem2.title = "Buy Eggs"
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "Buy Bread"
+        itemArray.append(newItem3)
+        
+        if let items = defaults.array(forKey: "TodoListArray") as?  [Item] {
             itemArray = items
         }
     }
@@ -27,7 +39,18 @@ class ViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
       let cell =  tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
-      cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+      
+        // Ternary Operator ==>
+        // value = condition ? valueodtrue : valueoffalse
+        
+        cell.accessoryType = item.done ? .checkmark : .none
+//        if item.done == true{
+//            cell.accessoryType = .checkmark
+//        }else{
+//            cell.accessoryType = .none
+//        }
       return cell
     }
     
@@ -35,13 +58,17 @@ class ViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //print(itemArray[indexPath.row])
         //tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }else{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
+//        if itemArray[indexPath.row].done == false{
+//            itemArray[indexPath.row].done = true
+//        }
+//        else{
+//            itemArray[indexPath.row].done = false
+//        }
         tableView.deselectRow(at: indexPath, animated: true)
+        tableView.reloadData()
+        
     }
 
     //MARK - Add New Items
@@ -49,7 +76,11 @@ class ViewController: UITableViewController {
         var textfield = UITextField()
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle:.alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-            self.itemArray.append(textfield.text!)
+           
+            let newitem = Item()
+            newitem.title = textfield.text!
+            self.itemArray.append(newitem)
+            
             self.defaults.setValue(self.itemArray, forKey: "TodoListArray")
             self.tableView.reloadData()
         }
