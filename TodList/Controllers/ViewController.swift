@@ -9,27 +9,31 @@
 import UIKit
 
 class ViewController: UITableViewController {
-    
+     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
     var itemArray = [Item]()
-    let defaults = UserDefaults.standard
+   // let defaults = UserDefaults.standard
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+       print(dataFilePath)
+        
         // Do any additional setup after loading the view.
-        let newItem1 = Item()
-        newItem1.title = "Buy Chocolate"
-        itemArray.append(newItem1)
+//        let newItem1 = Item()
+//        newItem1.title = "Buy Chocolate"
+//        itemArray.append(newItem1)
+//
+//        let newItem2 = Item()
+//        newItem2.title = "Buy Eggs"
+//        itemArray.append(newItem2)
+//
+//        let newItem3 = Item()
+//        newItem3.title = "Buy Bread"
+//        itemArray.append(newItem3)
+        loadItems()
         
-        let newItem2 = Item()
-        newItem2.title = "Buy Eggs"
-        itemArray.append(newItem2)
-        
-        let newItem3 = Item()
-        newItem3.title = "Buy Bread"
-        itemArray.append(newItem3)
-        
-        if let items = defaults.array(forKey: "TodoListArray") as?  [Item] {
-            itemArray = items
-        }
+//        if let items = defaults.array(forKey: "TodoListArray") as?  [Item] {
+//            itemArray = items
+//        }
     }
     
     //MARK - Tableview Datasource Methods
@@ -46,6 +50,7 @@ class ViewController: UITableViewController {
         // value = condition ? valueodtrue : valueoffalse
         
         cell.accessoryType = item.done ? .checkmark : .none
+      
 //        if item.done == true{
 //            cell.accessoryType = .checkmark
 //        }else{
@@ -59,7 +64,7 @@ class ViewController: UITableViewController {
         //print(itemArray[indexPath.row])
         //tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
+        saveItems()
 //        if itemArray[indexPath.row].done == false{
 //            itemArray[indexPath.row].done = true
 //        }
@@ -81,7 +86,10 @@ class ViewController: UITableViewController {
             newitem.title = textfield.text!
             self.itemArray.append(newitem)
             
-            self.defaults.setValue(self.itemArray, forKey: "TodoListArray")
+           // self.defaults.setValue(self.itemArray, forKey: "TodoListArray")
+           
+            self.saveItems()
+            
             self.tableView.reloadData()
         }
         alert.addTextField { (alertTextfield) in
@@ -93,5 +101,30 @@ class ViewController: UITableViewController {
     }
     
     
+    func saveItems(){
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array! \(error)")
+        }
+        self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+       if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            do{
+                itemArray = try decoder.decode([Item].self, from: data)
+            }
+            catch{
+                print("Error")
+            }
+            
+        }
+        
+    }
 }
 
